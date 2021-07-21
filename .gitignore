@@ -1,0 +1,8 @@
+# python.
+*.py[cod]
+__pycache__/
+.ipynb_checkpoints/
+
+# graph plots.
+*.png
+*.dot
