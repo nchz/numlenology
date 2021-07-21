@@ -1,0 +1,4 @@
+graphviz==0.16
+num2words==0.5.*
+requests==2.24.*
+Unidecode==1.2.*
