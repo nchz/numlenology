@@ -3,7 +3,8 @@ from collections import defaultdict
 import graphviz as gv
 from num2words import CONVERTER_CLASSES, num2words
 
-from fade_color import fade_color
+from numlenology.utils import float_range, rank_keys
+from numlenology.utils.color import fade_color
 
 
 LANGS = sorted(set(lang[:2] for lang in CONVERTER_CLASSES.keys()))
@@ -12,30 +13,6 @@ NODE_COLOR_LEAF = "#009000bb"
 NODE_COLOR_ROOT = "#000000bb"
 NODE_SIZE_MIN = 0.4
 NODE_SIZE_MAX = 0.9
-
-
-def float_range(a, b, num_steps):
-    """Like `range` but allows float values."""
-    step = (b - a) / num_steps
-    return [a + (i * step) for i in range(num_steps)]
-
-
-def rank_nodes(score_by_node, reverse=False):
-    """
-    Given a dict `{node: score}` where `score` is any sortable value, return
-    a dict `{node: rank}` where `rank` is an integer corresponding to the
-    position that `node` gets in an ascending sorting by `score`.
-
-    For example:
-        a = {"a": 3, "b": 100, "c": 1, "d": 1}
-        b = {"a": 2, "b": 3, "c": 1, "d": 1}
-        rank_nodes(a) == b
-    """
-    nodes_by_score = defaultdict(set)
-    for node, score in score_by_node.items():
-        nodes_by_score[score].add(node)
-    rank = enumerate(sorted(nodes_by_score.items(), reverse=reverse))
-    return {n: i for i, (score, nodes) in rank for n in nodes}
 
 
 def build_single_chain(n, lang="en"):
@@ -118,14 +95,14 @@ def build_graph(bound=100, lang="en"):
         edges = set((str(x), str(y)) for x, y in edges)
         graph_edges |= edges
 
-    depths = rank_nodes(depth_by_node, reverse=True)
+    depths = rank_keys(depth_by_node, reverse=True)
     color_scale = fade_color(
         NODE_COLOR_LEAF,
         NODE_COLOR_ROOT,
         1 + max(depths.values()),
     )
 
-    grades = rank_nodes(grade_by_node, reverse=True)
+    grades = rank_keys(grade_by_node, reverse=True)
     size_scale = float_range(
         NODE_SIZE_MAX,
         NODE_SIZE_MIN,
