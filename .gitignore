@@ -3,6 +3,8 @@
 __pycache__/
 .ipynb_checkpoints/
 
-# graph plots.
+# graph data.
 *.png
 *.dot
+*.json
+*.pickle

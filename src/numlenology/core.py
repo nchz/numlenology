@@ -1,3 +1,4 @@
+import pickle
 from collections import defaultdict
 
 import graphviz as gv
@@ -8,6 +9,7 @@ from numlenology.utils.color import fade_color
 
 
 LANGS = sorted(set(lang[:2] for lang in CONVERTER_CLASSES.keys()))
+PICKLE_FILENAME = "./data/{lang}-{bound}.pickle"
 
 NODE_COLOR_LEAF = "#009000bb"
 NODE_COLOR_ROOT = "#000000bb"
@@ -52,10 +54,17 @@ def build_single_chain(n, lang="en"):
     return visited, end_loop
 
 
-def build_graph(bound=100, lang="en"):
+def build_graph(bound=100, lang="en", dump_pickle=False):
     """
     Call `build_single_chain` for each number from 0 to `bound` included
     and return a graphviz.Digraph object.
+
+    If `dump_pickle` then a file is generated containing a dict with the
+    following keys:
+        - end_loops: the len of this set is the num of connected components.
+        - graph_edges: each tuple (A, B) in this set is an edge A->B.
+        - grade_by_node: dict {node: grade}. only NOT leaf nodes are here.
+        - depth_by_node: dict {node: depth}. all nodes are here.
     """
     g = gv.Digraph(
         engine="neato",
@@ -71,13 +80,17 @@ def build_graph(bound=100, lang="en"):
         },
     )
 
+    end_loops = set()
     graph_edges = set()
-    depth_by_node = defaultdict(int)
     grade_by_node = defaultdict(int)
+    depth_by_node = defaultdict(int)
 
     for n in range(bound + 1):
         visited, end_loop = build_single_chain(n, lang)
         depth_by_node[n] = len(visited) - len(end_loop)
+
+        # use a set of tuples to find unique end loops.
+        end_loops.add(tuple(sorted(end_loop)))
 
         # count node grade. we skip the first visited node, it's the leaf
         # for this single chain.
@@ -90,10 +103,7 @@ def build_graph(bound=100, lang="en"):
         edges = list(zip(visited[:-1], visited[1:]))
         # add the last edge that completes the loop.
         edges += [(end_loop[-1], end_loop[0])]
-
-        # convert to str so graphviz takes them as node labels.
-        edges = set((str(x), str(y)) for x, y in edges)
-        graph_edges |= edges
+        graph_edges |= set(edges)
 
     depths = rank_keys(depth_by_node, reverse=True)
     color_scale = fade_color(
@@ -109,6 +119,7 @@ def build_graph(bound=100, lang="en"):
         1 + max(grades.values()),
     )
 
+    # build graph. cast objects to str, graphviz requires this type.
     for node, grade in grades.items():
         g.node(
             str(node),
@@ -118,6 +129,16 @@ def build_graph(bound=100, lang="en"):
         )
 
     for e in graph_edges:
-        g.edge(*e)
+        g.edge(*map(str, e))
+
+    if dump_pickle:
+        graph_data = {
+            "end_loops": end_loops,
+            "graph_edges": graph_edges,
+            "grade_by_node": grade_by_node,
+            "depth_by_node": depth_by_node,
+        }
+        with open(PICKLE_FILENAME.format(lang=lang, bound=bound), "wb") as f:
+            pickle.dump(graph_data, f)
 
     return g
