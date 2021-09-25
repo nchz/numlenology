@@ -11,7 +11,7 @@ def rank_keys(score_by_key, reverse=False):
     """
     Given a dict `{key: score}` where `score` is any sortable value, return
     a dict `{key: rank}` where `rank` is an integer corresponding to the
-    position that `key` would get sorting by `score`.
+    position that `key` would get sorting by `score` considering ties.
 
     For example:
         a = {"a": 3, "b": 100, "c": 1, "d": 1}
