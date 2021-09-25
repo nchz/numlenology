@@ -61,8 +61,9 @@ def build_graph(bound=100, lang="en", dump_pickle=False):
 
     If `dump_pickle` then a file is generated containing a dict with the
     following keys:
-        - end_loops: the len of this set is the num of connected components.
-        - graph_edges: each tuple (A, B) in this set is an edge A->B.
+        - connected_comp: dict {end_loop: nodes}. `nodes` is the set of nodes
+            in each connected component, characterized by `end_loop`.
+        - edges: each tuple (A, B) in this set is an edge A->B.
         - grade_by_node: dict {node: grade}. only NOT leaf nodes are here.
         - depth_by_node: dict {node: depth}. all nodes are here.
     """
@@ -80,7 +81,7 @@ def build_graph(bound=100, lang="en", dump_pickle=False):
         },
     )
 
-    end_loops = set()
+    connected_comp = defaultdict(set)
     graph_edges = set()
     grade_by_node = defaultdict(int)
     depth_by_node = defaultdict(int)
@@ -90,7 +91,7 @@ def build_graph(bound=100, lang="en", dump_pickle=False):
         depth_by_node[n] = len(visited) - len(end_loop)
 
         # use a set of tuples to find unique end loops.
-        end_loops.add(tuple(sorted(end_loop)))
+        connected_comp[sorted(end_loop)].add(n)
 
         # count node grade. we skip the first visited node, it's the leaf
         # for this single chain.
@@ -133,8 +134,8 @@ def build_graph(bound=100, lang="en", dump_pickle=False):
 
     if dump_pickle:
         graph_data = {
-            "end_loops": end_loops,
-            "graph_edges": graph_edges,
+            "connected_comp": connected_comp,
+            "edges": graph_edges,
             "grade_by_node": grade_by_node,
             "depth_by_node": depth_by_node,
         }
