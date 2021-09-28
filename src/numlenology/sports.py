@@ -1,62 +1,95 @@
-import pickle
-
-from numlenology.core import PICKLE_FILENAME
+from numlenology import Graph, SUPPORTED_LANGS
 
 
-def load_graph_data(lang, bound):
-    with open(PICKLE_FILENAME.format(lang=lang, bound=bound), "rb") as f:
-        graph_data = pickle.load(f)
-    return graph_data
+ll = {}
+bln = {}
+sln = {}
+bf = {}
+sf = {}
+ncc = {}
+ccM = {}
+ccS = {}
+ccm = {}
+ccs = {}
+G = {}
+D = {}
+beg = {}
+seg = {}
+
+for lang in SUPPORTED_LANGS:
+    g = Graph(lang)
+    ll[lang] = max(len(el) for el in g.end_loops)
+    bln[lang] = max(el.max() for el in g.end_loops)
+    sln[lang] = min(el.min() for el in g.end_loops)
+    bf[lang] = g.non_leaf_nodes.max()
+    sf[lang] = g.non_leaf_nodes.min()
+    ncc[lang] = len(g.ccs)
+    ccM[lang] = max([cc.mean().round(3) for cc in g.ccs.values()])
+    ccS[lang] = max([cc.std().round(3) for cc in g.ccs.values()])
+    ccm[lang] = min([cc.mean().round(3) for cc in g.ccs.values()])
+    ccs[lang] = min([cc.std().round(3) for cc in g.ccs.values()])
+    G[lang] = g.gbn.max()
+    D[lang] = g.dbn.max()
+    beg[lang] = g.edge_gaps.max()
+    seg[lang] = g.edge_gaps.min()
 
 
-# gd = load_graph_data(lang, bound)
-
-def get_max_depth(gd):
-    # TODO return node with max depth as well.
-    """Get max node depth from `gd`."""
-    return max(gd["depth_by_node"].values())
+def result(dic):
+    return sorted(dic.items(), key=lambda t: t[1], reverse=True)
 
 
-def get_max_degree(gd):
-    # TODO idem `get_max_depth`.
-    """Get max node degree from `gd`."""
-    return max(gd["degree_by_node"].values())
+# print("########## longest loop")
+# for lang, v in result(ll):
+#     print(lang, v)
 
+# print("########## biggest loop node")
+# for lang, v in result(bln):
+#     print(lang, v)
 
-def get_leaf_nodes(gd):
-    # TODO get_max_leaf, etc.
-    """Get leaves from graph data and return them sorted."""
-    all_nodes = gd["depth_by_node"].keys()
-    non_leaves = gd["degree_by_node"].keys()
-    leaf_nodes = all_nodes - non_leaves
-    return sorted(leaf_nodes)
+# print("########## smallest loop node")
+# for lang, v in result(sln):
+#     print(lang, v)
 
+print("########## biggest non-leaf")
+for lang, v in result(bf):
+    print(lang, v)
 
-def get_edge_gaps(gd):
-    """Get (A - B) for each edge A->B."""
-    gaps = [(a - b, (a, b)) for a, b in gd["edges"]]
-    return sorted(gaps)
+# print("########## smallest non-leaf")
+# for lang, v in result(sf):
+#     print(lang, v)
 
+# print("########## num of CCs")
+# for lang, v in result(ncc):
+#     print(lang, v)
 
-def get_num_cc(gd):
-    """Get number of connected components."""
-    return len(gd["connected_comp"])
+# print("########## max mean in a CC")
+# for lang, v in result(ccM):
+#     print(lang, v)
 
+# print("########## max std in a CC")
+# for lang, v in result(ccS):
+#     print(lang, v)
 
-def get_end_loop_nodes(gd):
-    # TODO idem `get_leaf_nodes`.
-    """
-    Get nodes from `end_loop` in graph data and return them sorted.
-    Nodes from all end loop are combined in one list.
-    """
-    end_loop_nodes = [n for end_loop in gd["connected_comp"].keys() for n in end_loop]
-    return sorted(end_loop_nodes)
+# print("########## min mean in a CC")
+# for lang, v in result(ccm):
+#     print(lang, v)
 
+# print("########## min std in a CC")
+# for lang, v in result(ccs):
+#     print(lang, v)
 
-def all_cc_higher_el(gd):
-    """
-    Find connected components whose nodes are all higher than the nodes in the
-    end loop of the connected component. Return None if no such component.
-    """
-    ccs = [(end_loop, cc_nodes - set(end_loop)) for end_loop, cc_nodes in gd["connected_comp"]]
-    return [(el, cc) for el, cc in ccs if max(el) < min(cc)]
+# print("########## max degree")
+# for lang, v in result(G):
+#     print(lang, v)
+
+# print("########## max depth")
+# for lang, v in result(D):
+#     print(lang, v)
+
+print("########## biggest edge gap")
+for lang, v in result(beg):
+    print(lang, v)
+
+# print("########## smallest edge gap")
+# for lang, v in result(seg):
+#     print(lang, v)
