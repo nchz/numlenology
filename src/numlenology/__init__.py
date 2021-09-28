@@ -122,6 +122,7 @@ class Graph:
     """Class that contains the Numlenology representation for a given language."""
 
     def __init__(self, lang, bound=100):
+        self.lang = lang
         bound += 1  # work from 0 to `bund` included.
 
         m = build_graph_matrix_rec(bound, lang)
@@ -150,6 +151,24 @@ class Graph:
             # node that "closes" the loop, the only child node of `dfo[-1]`.
             ncl = m[dfo[-1]].argmax()
             # depth is equal to the number of nodes in `dfo` until we reach the end loop.
-            depth = np.where(dfo == ncl)[0][0]
+            depth = np.where(dfo == ncl)[0]
             depth_by_node[node] = depth
         self.dbn = self.depth_by_node = depth_by_node
+
+        self.end_loops = []
+        for cc_nodes in self.ccs.values():
+            # take any node from the CC to find the end loop from it.
+            node = cc_nodes.min()
+            dfo = csgraph.depth_first_order(m, node, return_predecessors=False)
+            depth = self.dbn[node]
+            end_loop = dfo[depth :]
+            self.end_loops.append(end_loop)
+
+        self.leaf_nodes = np.where(self.gbn == 0)[0]
+        self.non_leaf_nodes = np.where(self.gbn != 0)[0]
+
+        edge_gaps = np.zeros([bound-1], dtype=np.int16)
+        for node in range(bound-1):
+            child = m[node].argmax()
+            edge_gaps[node] = node - child
+        self.edge_gaps = edge_gaps
