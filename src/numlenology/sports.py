@@ -20,14 +20,14 @@ def get_max_depth(gd):
 def get_max_degree(gd):
     # TODO idem `get_max_depth`.
     """Get max node degree from `gd`."""
-    return max(gd["grade_by_node"].values())
+    return max(gd["degree_by_node"].values())
 
 
 def get_leaf_nodes(gd):
     # TODO get_max_leaf, etc.
     """Get leaves from graph data and return them sorted."""
     all_nodes = gd["depth_by_node"].keys()
-    non_leaves = gd["grade_by_node"].keys()
+    non_leaves = gd["degree_by_node"].keys()
     leaf_nodes = all_nodes - non_leaves
     return sorted(leaf_nodes)
 
