@@ -5,7 +5,7 @@ RUN apt update \
     && rm -r /var/cache/apt/
 
 COPY requirements.txt /requirements.txt
-RUN pip install -U -r /requirements.txt
+RUN pip install --no-cache-dir -U -r /requirements.txt
 
 COPY src /src
 WORKDIR /src
