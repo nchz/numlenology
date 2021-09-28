@@ -1,14 +1,6 @@
 from numlenology import Graph, SUPPORTED_LANGS
 
 
-# def all_cc_higher_el(gd):
-#     """
-#     Find connected components whose nodes are all higher than the nodes in the
-#     end loop of the connected component. Return None if no such component.
-#     """
-#     ccs = [(end_loop, cc_nodes - set(end_loop)) for end_loop, cc_nodes in gd["connected_comp"]]
-#     return [(el, cc) for el, cc in ccs if max(el) < min(cc)]
-
 ll = {}
 bln = {}
 sln = {}
@@ -41,8 +33,10 @@ for lang in SUPPORTED_LANGS:
     beg[lang] = g.edge_gaps.max()
     seg[lang] = g.edge_gaps.min()
 
+
 def result(dic):
     return sorted(dic.items(), key=lambda t: t[1], reverse=True)
+
 
 # print("########## longest loop")
 # for lang, v in result(ll):

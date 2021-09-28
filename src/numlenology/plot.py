@@ -1,4 +1,3 @@
-
 import graphviz as gv
 
 from numlenology.graph import build_graph

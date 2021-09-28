@@ -43,6 +43,7 @@ def build_graph_matrix(bound, lang):
 
 # old methods.
 
+
 def build_single_chain(n, lang):
     """
     Build a chain with the following relationship:
@@ -135,13 +136,13 @@ class Graph:
             cc_nodes = np.where(cc_labels == label)[0]
             self.ccs[label] = cc_nodes
         # if cc_num > 1:
-            # cc_nodes.mean()
-            # cc_nodes.std()
-            # cc_nodes.sum()
-            # len(cc_nodes)
+        #     cc_nodes.mean()
+        #     cc_nodes.std()
+        #     cc_nodes.sum()
+        #     len(cc_nodes)
 
-        # with axis=0 we calculate for each node X how many times we jumped from any node to X
-        # when we built the matrix. then we get the value for this `node`.
+        # with axis=0 we calculate for each node X how many times we jumped
+        # from any node to X when we built the matrix.
         self.gbn = self.degree_by_node = m.sum(axis=0)
 
         # get chain until loop.
@@ -150,7 +151,7 @@ class Graph:
             dfo = csgraph.depth_first_order(m, node, return_predecessors=False)
             # node that "closes" the loop, the only child node of `dfo[-1]`.
             ncl = m[dfo[-1]].argmax()
-            # depth is equal to the number of nodes in `dfo` until we reach the end loop.
+            # depth is equal to the length of `dfo` minus the length of the end loop.
             depth = np.where(dfo == ncl)[0]
             depth_by_node[node] = depth
         self.dbn = self.depth_by_node = depth_by_node
@@ -161,14 +162,14 @@ class Graph:
             node = cc_nodes.min()
             dfo = csgraph.depth_first_order(m, node, return_predecessors=False)
             depth = self.dbn[node]
-            end_loop = dfo[depth :]
+            end_loop = dfo[depth:]
             self.end_loops.append(end_loop)
 
         self.leaf_nodes = np.where(self.gbn == 0)[0]
         self.non_leaf_nodes = np.where(self.gbn != 0)[0]
 
-        edge_gaps = np.zeros([bound-1], dtype=np.int16)
-        for node in range(bound-1):
+        edge_gaps = np.zeros([bound - 1], dtype=np.int16)
+        for node in range(bound - 1):
             child = m[node].argmax()
             edge_gaps[node] = node - child
         self.edge_gaps = edge_gaps
