@@ -21,15 +21,15 @@ def recursive_build_chain(lang, matrix, i, visited):
         return recursive_build_chain(lang, matrix, j, visited)
 
 
-def build_graph_matrix_rec(bound, lang):
-    matrix = np.zeros([bound, bound], dtype=np.uint16)
+def build_graph_matrix_rec(lang, bound):
+    matrix = np.zeros([bound, bound], dtype=np.int32)
     for i in range(bound):
         recursive_build_chain(lang, matrix, i, [])
     return matrix
 
 
-def build_graph_matrix(bound, lang):
-    matrix = np.zeros([bound, bound], dtype=np.uint16)
+def build_graph_matrix(lang, bound):
+    matrix = np.zeros([bound, bound], dtype=np.int32)
     for i in range(bound):
         visited = [i]
         while (j := len(num2words(i, lang=lang))) not in visited:
@@ -81,7 +81,7 @@ def build_single_chain(n, lang):
     return visited, end_loop
 
 
-def build_graph(bound, lang):
+def build_graph(lang, bound):
     """
     Call `build_single_chain` for each number from 0 to `bound` included
     and return the following tuple:
@@ -100,8 +100,8 @@ def build_graph(bound, lang):
         visited, end_loop = build_single_chain(n, lang)
         depth_by_node[n] = len(visited) - len(end_loop)
 
-        # # use a set of tuples to find unique end loops.
-        # connected_comp[tuple(sorted(end_loop))].add(n)
+        # use a set of tuples to find unique end loops.
+        connected_comp[tuple(sorted(end_loop))].add(n)
 
         # count node degree. we skip the first visited node, it's the leaf
         # for this single chain.
@@ -116,17 +116,22 @@ def build_graph(bound, lang):
         edges += [(end_loop[-1], end_loop[0])]
         graph_edges |= set(edges)
 
-    return connected_comp, graph_edges, degree_by_node, depth_by_node
+    return {
+        "connected_comp": connected_comp,
+        "graph_edges": graph_edges,
+        "degree_by_node": degree_by_node,
+        "depth_by_node": depth_by_node,
+    }
 
 
 class Graph:
     """Class that contains the Numlenology representation for a given language."""
 
-    def __init__(self, lang, bound=100):
+    def __init__(self, lang, bound=100, builder=build_graph_matrix_rec):
         self.lang = lang
         bound += 1  # work from 0 to `bund` included.
 
-        m = build_graph_matrix_rec(bound, lang)
+        m = builder(lang, bound)
         self.matrix = m
 
         # connected components.
@@ -168,7 +173,7 @@ class Graph:
         self.leaf_nodes = np.where(self.gbn == 0)[0]
         self.non_leaf_nodes = np.where(self.gbn != 0)[0]
 
-        edge_gaps = np.zeros([bound - 1], dtype=np.int16)
+        edge_gaps = np.zeros([bound - 1], dtype=np.int32)
         for node in range(bound - 1):
             child = m[node].argmax()
             edge_gaps[node] = node - child
