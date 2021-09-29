@@ -11,9 +11,16 @@ cmd=$1
 shift
 
 case ${cmd} in
-    h | help)
-        # self-print to stdout.
-        cat $0 | less
+    start)
+        docker run -dt --rm \
+            --name ${PROJECT_NAME} \
+            -p 8888:8888 \
+            -v ${PROJECT_ROOT_DIR}/src:/src \
+            ${DOCKER_IMAGE_NAME}
+        ;;
+
+    stop)
+        docker stop ${PROJECT_NAME}
         ;;
 
     b | build)
@@ -22,27 +29,30 @@ case ${cmd} in
             $@ ${PROJECT_ROOT_DIR}
         ;;
 
-    r | run)
-        docker run -it --rm \
-            --name ${PROJECT_NAME} \
-            -p 8888:8888 \
-            -v ${PROJECT_ROOT_DIR}/src:/src \
-            ${DOCKER_IMAGE_NAME} \
-            jupyter lab \
-                --ip 0.0.0.0 \
-                --allow-root \
-                --NotebookApp.token=''
-        ;;
-
     s | shell)
         # open bash inside a running container of the project.
         docker exec -it \
             ${PROJECT_NAME} /bin/bash
         ;;
 
+    j | jupyterlab)
+        # launch jupyter server.
+        docker exec \
+            ${PROJECT_NAME} \
+            jupyter lab \
+                --ip 0.0.0.0 \
+                --allow-root \
+                --NotebookApp.token=''
+        ;;
+
+    h | help)
+        # self-print to stdout.
+        cat $0 | less
+        ;;
+
     *)
         echo "Bad command. Options are:"
-        grep -E "^    . \| .*\)$" $0
+        grep -E "^    [a-z \|]+\)$" $0
     ;;
 
 esac
