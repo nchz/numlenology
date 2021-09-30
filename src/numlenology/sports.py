@@ -34,62 +34,100 @@ for lang in SUPPORTED_LANGS:
     seg[lang] = g.edge_gaps.min()
 
 
-def result(dic):
-    return sorted(dic.items(), key=lambda t: t[1], reverse=True)
+def top10(dic):
+    return (
+        sorted(dic.items(), key=lambda t: t[1], reverse=True)[:10],
+        sorted(dic.items(), key=lambda t: t[1], reverse=False)[:10],
+    )
 
 
-# print("########## longest loop")
-# for lang, v in result(ll):
-#     print(lang, v)
+print("########## longest loop")
+tops, dops = top10(ll)
+for lang, v in tops:
+    print(lang, v)
 
-# print("########## biggest loop node")
-# for lang, v in result(bln):
-#     print(lang, v)
+print("########## biggest loop node")
+tops, dops = top10(bln)
+for lang, v in tops:
+    print(lang, v)
 
 # print("########## smallest loop node")
-# for lang, v in result(sln):
+# tops, dops = top10(sln)
+# for lang, v in tops:
+#     print(lang, v)
+# print("#####")
+# for lang, v in dops:
 #     print(lang, v)
 
 print("########## biggest non-leaf")
-for lang, v in result(bf):
+tops, dops = top10(bf)
+for lang, v in tops:
+    print(lang, v)
+print("#####")
+for lang, v in dops:
     print(lang, v)
 
 # print("########## smallest non-leaf")
-# for lang, v in result(sf):
+# tops, dops = top10(sf)
+# for lang, v in tops:
+#     print(lang, v)
+# print("#####")
+# for lang, v in dops:
 #     print(lang, v)
 
-# print("########## num of CCs")
-# for lang, v in result(ncc):
-#     print(lang, v)
-
-# print("########## max mean in a CC")
-# for lang, v in result(ccM):
-#     print(lang, v)
-
-# print("########## max std in a CC")
-# for lang, v in result(ccS):
-#     print(lang, v)
-
-# print("########## min mean in a CC")
-# for lang, v in result(ccm):
-#     print(lang, v)
-
-# print("########## min std in a CC")
-# for lang, v in result(ccs):
-#     print(lang, v)
-
-# print("########## max degree")
-# for lang, v in result(G):
-#     print(lang, v)
-
-# print("########## max depth")
-# for lang, v in result(D):
-#     print(lang, v)
-
-print("########## biggest edge gap")
-for lang, v in result(beg):
+print("########## num of CCs")
+tops, dops = top10(ncc)
+for lang, v in tops:
     print(lang, v)
 
+print("########## max mean in a CC")
+tops, dops = top10(ccM)
+for lang, v in tops:
+    print(lang, v)
+
+print("########## min mean in a CC")
+tops, dops = top10(ccm)
+print("#####")
+for lang, v in dops:
+    print(lang, v)
+
+print("########## max std in a CC")
+tops, dops = top10(ccS)
+for lang, v in tops:
+    print(lang, v)
+print("#####")
+for lang, v in dops[:1]:
+    print(lang, v)
+
+print("########## min std in a CC")
+tops, dops = top10(ccs)
+print("#####")
+for lang, v in dops:
+    print(lang, v)
+
+print("########## max degree")
+tops, dops = top10(G)
+print("#####")
+for lang, v in dops:
+    print(lang, v)
+
+print("########## max depth")
+tops, dops = top10(D)
+for lang, v in tops:
+    print(lang, v)
+
+# print("########## biggest edge gap")
+# tops, dops = top10(beg)
+# for lang, v in tops:
+#     print(lang, v)
+# print("#####")
+# for lang, v in dops:
+#     print(lang, v)
+
 # print("########## smallest edge gap")
-# for lang, v in result(seg):
+# tops, dops = top10(seg)
+# for lang, v in tops:
+#     print(lang, v)
+# print("#####")
+# for lang, v in dops:
 #     print(lang, v)
